@@ -1,0 +1,161 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  EnvironmentKey:
+      Description: An environment security key
+      Type: String
+      Default: NesrinKey
+
+  AImageId:
+      Description: Amazone EC2 instancce ID
+      Type: String
+      Default: ami-0d8f6eb4f641ef691
+
+  NSEC2PUB1Type:
+      Description: Public EC2 instance on AZ 1
+      Type: String
+      Default: t2.micro
+
+  NSEC2PUB2Type:
+      Description: Public EC2 instance on AZ 2
+      Type: String
+      Default: t2.micro
+
+  NSEC2PRV1Type:
+      Description: Private EC2 instance on AZ 1
+      Type: String
+      Default: t2.micro
+
+  NSEC2PRV2Type:
+      Description: Private EC2 instance on AZ 2
+      Type: String
+      Default: t2.micro
+
+  NSEC2PUB1Size:
+      Description: Public EC2 instance on AZ 1
+      Type: Number
+      Default: 30
+
+  NSEC2PUB2Size:
+      Description: Public EC2 instance on AZ 2
+      Type: Number
+      Default: 30
+
+  NSEC2PRV1Size:
+      Description: Private EC2 instance on AZ 1
+      Type: Number
+      Default: 30
+
+  NSEC2PRV2Size:
+      Description: Private EC2 instance on AZ 2
+      Type: Number
+      Default: 30
+
+
+
+Resources:
+
+    NSCET005LabEC2PUB1:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageId: !Ref AImageId
+        KeyName: !Ref EnvironmentKey
+        InstanceType: !Ref NSEC2PUB1Type
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: !Ref NSEC2PUB1Size
+              DeleteOnTermination: true
+              # VolumeType: standard #Allowed Values: gp2 | io1 | sc1 | st1 | standard
+              # Iops: 1000 required if VolumeType = io1
+        NetworkInterfaces: #subnet and group are direct properties for performance
+          - SubnetId: !ImportValue NSPubSN1
+            DeviceIndex: 0
+            GroupSet:
+              - !ImportValue NSVPCBastionSG
+        Tags:
+          -
+            Key: "Name"
+            Value: "NSCET005LabEC2PUB1"
+
+    NSCET005LabEC2PUB2:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageId: !Ref AImageId
+        KeyName: !Ref EnvironmentKey
+        InstanceType: !Ref NSEC2PUB2Type
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: !Ref NSEC2PUB2Size
+              DeleteOnTermination: true
+        NetworkInterfaces:
+          - SubnetId: !ImportValue NSPubSN2
+            DeviceIndex: 0
+            GroupSet:
+              - !ImportValue NSPublicSecurityGroup
+        Tags:
+          -
+            Key: "Name"
+            Value: "NSCET005LabEC2PUB2"
+
+    NSCET005LabEC2PRV1:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageId: !Ref AImageId
+        KeyName: !Ref EnvironmentKey
+        InstanceType: !Ref NSEC2PRV1Type
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: !Ref NSEC2PRV1Size
+              DeleteOnTermination: true
+        NetworkInterfaces:
+          - SubnetId: !ImportValue NSPrvSN1
+            DeviceIndex: 0
+            GroupSet:
+              - !ImportValue NSPrivateSecurityGroup
+        Tags:
+          -
+            Key: "Name"
+            Value: "NSCET005LabEC2PRV1"
+
+    NSCET005LabEC2PRV2:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageId: !Ref AImageId
+        KeyName: !Ref EnvironmentKey
+        InstanceType: !Ref NSEC2PRV2Type
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: !Ref NSEC2PRV2Size
+              DeleteOnTermination: true
+        NetworkInterfaces:
+          - SubnetId: !ImportValue NSPrvSN2
+            DeviceIndex: 0
+            GroupSet:
+              - !ImportValue NSPrivateSecurityGroup
+        Tags:
+          -
+            Key: "Name"
+            Value: "NSCET005LabEC2PRV2"
+
+
+Outputs:
+  NSCET005LabEC2PUB1:
+    Description: Public EC2 instance on AZ 1
+    Value: !Ref NSCET005LabEC2PUB1
+
+  NSCET005LabEC2PUB2:
+    Description: Public EC2 instance on AZ 1
+    Value: !Ref NSCET005LabEC2PUB2
+
+  NSCET005LabEC2PRV1:
+    Description: Private EC2 instance on AZ 1
+    Value: !Ref NSCET005LabEC2PRV1
+
+  NSCET005LabEC2PRV2:
+    Description: Private EC2 instance on AZ 1
+    Value: !Ref NSCET005LabEC2PRV2
